@@ -77,7 +77,7 @@ def sayvox():
 def play_vox(text):
     vox.savetomp3(text)
 
-    filename = slugify(text+"-"+lang+"-"+str(slow)) + ".mp3"
+    filename = slugify(text) + ".mp3"
     urlparts = urlparse(request.url)
     mp3_url = "http://" +urlparts.netloc + path + filename
     play_mp3(mp3_url)
