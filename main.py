@@ -1,3 +1,5 @@
+import hl1voxcombine
+from sys import argv
 from flask import Flask, request
 import socket
 import pychromecast
@@ -28,7 +30,7 @@ def play_tts(text, lang='en', slow=False):
         tts.save(cache_filename)
 
     urlparts = urlparse(request.url)
-    mp3_url = "http://" +urlparts.netloc + path + filename 
+    mp3_url = "http://" +urlparts.netloc + path + filename
     logging.info(mp3_url)
     play_mp3(mp3_url)
 
@@ -65,4 +67,8 @@ def say():
     return text
 
 if __name__ == '__main__':
-        app.run(debug=True,host='0.0.0.0')
+	args = getopts(argv)
+	if '-s' in args:
+		print(args['-i'])
+	else:
+    	print("Usage")
