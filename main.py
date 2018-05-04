@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-chromecast_name = "Home group" #edit me to be your google home group
+chromecast_name = "GoogleHome" #edit me to be your google home group
 
 app = Flask(__name__)
 logging.info("Starting up chromecasts")
