@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-chromecast_name = "GoogleHome" #edit me to be your google home group
+chromecast_name = "Alex's Chromecast" #edit me to be your google home group
 path = "/static/cache/"
 
 app = Flask(__name__)
@@ -72,15 +72,16 @@ def sayvox():
     text = request.args.get("text")
     if not text:
         return False
-    return "vox says: " + text
+    filename = play_vox(text)
+    return "vox says: " + filename
 
 def play_vox(text):
-    vox.savetomp3(text)
-
-    filename = slugify(text) + ".mp3"
+    filename = vox.savetomp3(text)
+    print(filename)
     urlparts = urlparse(request.url)
-    mp3_url = "http://" +urlparts.netloc + path + filename
-    return play_mp3(mp3_url)
+    mp3_url = "http://" + urlparts.netloc + "/" + filename
+    play_mp3(mp3_url)
+    return(filename)
 
 def getopts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.

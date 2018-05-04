@@ -69,8 +69,9 @@ def savetomp3(sentence):
 			else:
 				word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
 				playlist = playlist.append(word_mp3)
-		playlist.export(slugify(combined_path + sentence + ".mp3"), format="mp3", bitrate="100k")
-	return(slugify(combined_path + sentence + ".mp3"))
+		playlist = playlist.append(AudioSegment.silent(duration=300))
+		playlist.export(combined_path + slugify(sentence) + ".mp3", format="mp3", bitrate="100k")
+	return(combined_path + slugify(sentence) + ".mp3")
 
 
 if __name__ == "__main__":
