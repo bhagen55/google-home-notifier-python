@@ -9,33 +9,55 @@
 #	- buzwarn
 import sys
 from playsound import playsound
+from pydub import AudioSegment
 
-soundpath = "vox/"
-filetype = ".wav"
+soundpath = "static/"
+filetype = ".mp3"
+combined_path = "static/cache/"
+
 comma = "_comma"
 period = "_period"
+ing = "ing"
 
 
-# Takes a string and forms it into filepaths of sounds
-def saysentence(saystring):
-	words = saystring.split()
+# Takes sentence and seperates into individual words
+def convertsentence(sentence):
+	words = sentence.split()
+
+	output = []
 
 	for word in words:
-		try:
-			if word[-3:] == 'ing':
-				play(word[:-3])
-				play('ing')
-			if word[-1:] == ',':
-				play(word[:-1])
-				play(comma)
-			else:
-				play(word)
-		except:
-			print("Couldn't find " + word)
+		if word[-3:] == 'ing':
+			output.append(word[:-3])
+			output.append(ing)
+		elif word[-1:] == ",":
+			output.append(word[:-1])
+			output.append(comma)
+		else:
+			output.append(word)
+	return output
+
+# Play words
+def playwords(words):
+	for word in words:
+		play(word)
+
 # Wrapper to add path and filetype
 def play(word):
 	playsound(soundpath + word + filetype)
 
+# Save words as an mp3
+def savetomp3(words):
+	mp3s = []
+	combined = AudioSegment
+
+	playlist = AudioSegment.silent(duration=500)
+	for word in words:
+		song = AudioSegment.from_mp3(soundpath + word + filetype)
+		playlist = playlist.append(song)
+	playlist.export(combined_path + "output.mp3", format="mp3")
+
 if __name__ == "__main__":
 	saystring = sys.argv[1];
-	saysentence(saystring)
+	playwords(convertsentence(saystring))
+	savetomp3(convertsentence(saystring))
