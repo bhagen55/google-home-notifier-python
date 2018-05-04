@@ -72,7 +72,7 @@ def sayvox():
     text = request.args.get("text")
     if not text:
         return False
-    return play_vox(text)
+    return "vox says: " + text
 
 def play_vox(text):
     vox.savetomp3(text)

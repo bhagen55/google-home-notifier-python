@@ -10,6 +10,7 @@
 import sys
 from playsound import playsound
 from pydub import AudioSegment
+from slugify import slugify
 import os
 
 soundpath = "static/"
@@ -68,8 +69,8 @@ def savetomp3(sentence):
 			else:
 				word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
 				playlist = playlist.append(word_mp3)
-		playlist.export(combined_path + sentence + ".mp3", format="mp3", bitrate="100k")
-	return(combined_path + sentence + ".mp3")
+		playlist.export(slugify(combined_path + sentence + ".mp3"), format="mp3", bitrate="100k")
+	return(slugify(combined_path + sentence + ".mp3"))
 
 
 if __name__ == "__main__":
