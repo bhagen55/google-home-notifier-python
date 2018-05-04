@@ -91,12 +91,4 @@ def getopts(argv):
     return opts
 
 if __name__ == '__main__':
-    args = getopts(sys.argv)
-    if '-s' in args:
-        print("Generating " + args['-s'] + " as mp3")
-        filename = vox.savetomp3(args['-s'])
-        if '-c' in args:
-            print("Casting sentence to " args['-c'])
-            play(filename)
-    else:
-        print("Usage")
+    app.run(debug=True,host='0.0.0.0')
