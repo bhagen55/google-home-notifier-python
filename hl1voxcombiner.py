@@ -62,9 +62,14 @@ def savetomp3(sentence):
 		words = convertsentence(sentence)
 		playlist = AudioSegment.silent(duration=500)
 		for word in words:
-			word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
-			playlist = playlist.append(word_mp3)
-			playlist.export(combined_path + sentence + ".mp3", format="mp3", bitrate="100k")
+			if not os.path.isfile(soundpath + word + filetype):
+				print(word + " does not exist, skipping")
+				sentence = sentence.replace(word, '')
+			else:
+				word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
+				playlist = playlist.append(word_mp3)
+		playlist.export(combined_path + sentence + ".mp3", format="mp3", bitrate="100k")
+	return(combined_path + sentence + ".mp3")
 
 
 if __name__ == "__main__":
