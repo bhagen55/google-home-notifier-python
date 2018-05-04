@@ -72,7 +72,7 @@ def sayvox():
     text = request.args.get("text")
     if not text:
         return False
-    play_vox(text)
+    return play_vox(text)
 
 def play_vox(text):
     vox.savetomp3(text)
@@ -80,7 +80,7 @@ def play_vox(text):
     filename = slugify(text) + ".mp3"
     urlparts = urlparse(request.url)
     mp3_url = "http://" +urlparts.netloc + path + filename
-    play_mp3(mp3_url)
+    return play_mp3(mp3_url)
 
 def getopts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
