@@ -57,9 +57,10 @@ def play(word):
 
 # Save sentence as an mp3
 def savetomp3(sentence):
-	if os.path.isfile(combined_path + sentence + ".mp3"):
+	if os.path.isfile(combined_path + slugify(sentence) + ".mp3"):
 		print("Sentence already in cache, not re-creating")
-	else:
+	    return(combined_path + slugify(sentence) + ".mp3"
+    else:
 		words = convertsentence(sentence)
 		playlist = AudioSegment.silent(duration=500)
 		for word in words:
@@ -70,8 +71,11 @@ def savetomp3(sentence):
 				word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
 				playlist = playlist.append(word_mp3)
 		playlist = playlist.append(AudioSegment.silent(duration=300))
-		playlist.export(combined_path + slugify(sentence) + ".mp3", format="mp3", bitrate="100k")
-	return(combined_path + slugify(sentence) + ".mp3")
+		if not playlist:
+            return "false"
+        else:
+            playlist.export(combined_path + slugify(sentence) + ".mp3", format="mp3", bitrate="100k")
+	        return(combined_path + slugify(sentence) + ".mp3")
 
 
 if __name__ == "__main__":

@@ -12,13 +12,21 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-chromecast_name = "Alex's Chromecast" #edit me to be your google home group
+chromecast_name = "Techhouse" #edit me to be your google home group
 path = "/static/cache/"
 
 app = Flask(__name__)
 logging.info("Starting up chromecasts")
 chromecasts = pychromecast.get_chromecasts()
 cast = next(cc for cc in chromecasts if cc.device.friendly_name == chromecast_name)
+
+@app.route('/chromecast/<name>')
+def switch_chromecast(name):
+    if name in chromecasts:
+	    cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
+	    return "Chromecast is now set to: " + name
+    else:
+	    return "Chromecast " + name + " is not available"
 
 def play_tts(text, lang='en', slow=False):
     tts = gTTS(text=text, lang=lang, slow=slow)
@@ -42,6 +50,7 @@ def play_mp3(mp3_url):
     mc = cast.media_controller
     mc.play_media(mp3_url, 'audio/mp3')
 
+
 @app.route('/static/<path:path>')
 def send_static(path):
         return send_from_directory('static', path)
@@ -56,6 +65,7 @@ def play(filename):
     else:
         return "False"
 
+
 @app.route('/say/')
 def say():
     text = request.args.get("text")
@@ -67,29 +77,29 @@ def say():
     play_tts(text, lang=lang)
     return text
 
+
 @app.route('/sayvox/')
 def sayvox():
     text = request.args.get("text")
     if not text:
         return False
-    filename = play_vox(text)
-    return "vox says: " + filename
+    else:
+        filename = play_vox(text)
+        if filename == "not found":
+            return "Vox can't say any of those words"
+        else:
+            return "vox says: " + filename
 
 def play_vox(text):
     filename = vox.savetomp3(text)
-    print(filename)
     urlparts = urlparse(request.url)
     mp3_url = "http://" + urlparts.netloc + "/" + filename
-    play_mp3(mp3_url)
-    return(filename)
+    if filename == "not found":
+        return "not found"
+    else:
+        play_mp3(mp3_url)
+        return(filename)
 
-def getopts(argv):
-    opts = {}  # Empty dictionary to store key-value pairs.
-    while argv:  # While there are arguments left to parse...
-        if argv[0][0] == '-':  # Found a "-name value" pair.
-            opts[argv[0]] = argv[1]  # Add key and value to the dictionary.
-        argv = argv[1:]  # Reduce the argument list by copying it starting from index 1.
-    return opts
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0')
