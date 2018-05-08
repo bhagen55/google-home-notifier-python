@@ -23,10 +23,10 @@ cast = next(cc for cc in chromecasts if cc.device.friendly_name == chromecast_na
 @app.route('/chromecast/<name>')
 def switch_chromecast(name):
     if name in chromecasts:
-	    cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
-	    return "Chromecast is now set to: " + name
+        cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
+        return "Chromecast is now set to: " + name
     else:
-	    return "Chromecast " + name + " is not available"
+        return "Chromecast " + name + " is not available"
 
 def play_tts(text, lang='en', slow=False):
     tts = gTTS(text=text, lang=lang, slow=slow)

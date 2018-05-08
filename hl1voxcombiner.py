@@ -24,61 +24,61 @@ ing = "ing"
 
 # Takes sentence and seperates into individual words
 def convertsentence(sentence):
-	words = sentence.split()
+    words = sentence.split()
 
-	output = []
+    output = []
 
-	for word in words:
-		# if word[-3:] == 'ing':
-		# 	output.append(word[:-3])
-		# 	output.append(ing)
-		if word[-1:] == ",":
-			output.append(word[:-1])
-			output.append(comma)
-		elif word[-1:] == ".":
-			output.append(word[:-1])
-			output.append(period)
-		else:
-			output.append(word)
-	return output
+    for word in words:
+    # if word[-3:] == 'ing':
+    # 	output.append(word[:-3])
+    # 	output.append(ing)
+    if word[-1:] == ",":
+    output.append(word[:-1])
+    output.append(comma)
+    elif word[-1:] == ".":
+    output.append(word[:-1])
+    output.append(period)
+    else:
+    output.append(word)
+    return output
 
 
 # Play sentence
 def playwords(sentence):
-	words = convertsentence(sentence)
-	for word in words:
-		play(word)
+    words = convertsentence(sentence)
+    for word in words:
+    play(word)
 
 
 # Wrapper to add path and filetype
 def play(word):
-	playsound(soundpath + word + filetype)
+    playsound(soundpath + word + filetype)
 
 
 # Save sentence as an mp3
 def savetomp3(sentence):
-	if os.path.isfile(combined_path + slugify(sentence) + ".mp3"):
-		print("Sentence already in cache, not re-creating")
-	    return(combined_path + slugify(sentence) + ".mp3"
+    if os.path.isfile(combined_path + slugify(sentence) + ".mp3"):
+    print("Sentence already in cache, not re-creating")
+        return(combined_path + slugify(sentence) + ".mp3"
     else:
-		words = convertsentence(sentence)
-		playlist = AudioSegment.silent(duration=500)
-		for word in words:
-			if not os.path.isfile(soundpath + word + filetype):
-				print(word + " does not exist, skipping")
-				sentence = sentence.replace(word, '')
-			else:
-				word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
-				playlist = playlist.append(word_mp3)
-		playlist = playlist.append(AudioSegment.silent(duration=300))
-		if not playlist:
+    words = convertsentence(sentence)
+    playlist = AudioSegment.silent(duration=500)
+    for word in words:
+    if not os.path.isfile(soundpath + word + filetype):
+    print(word + " does not exist, skipping")
+    sentence = sentence.replace(word, '')
+    else:
+    word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
+    playlist = playlist.append(word_mp3)
+    playlist = playlist.append(AudioSegment.silent(duration=300))
+    if not playlist:
             return "false"
         else:
             playlist.export(combined_path + slugify(sentence) + ".mp3", format="mp3", bitrate="100k")
-	        return(combined_path + slugify(sentence) + ".mp3")
+            return(combined_path + slugify(sentence) + ".mp3")
 
 
 if __name__ == "__main__":
-	saystring = sys.argv[1];
-	# playwords(saystring)
-	savetomp3(saystring)
+    saystring = sys.argv[1];
+    # playwords(saystring)
+    savetomp3(saystring)
