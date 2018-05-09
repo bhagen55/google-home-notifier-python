@@ -19,12 +19,19 @@ app = Flask(__name__)
 logging.info("Starting up chromecasts")
 chromecasts = pychromecast.get_chromecasts()
 cast = next(cc for cc in chromecasts if cc.device.friendly_name == chromecast_name)
+mc = cast.media_controller
+
+force_cast = False
+vol_level = 1
 
 @app.route('/chromecast/<name>')
 def switch_chromecast(name):
-    if name in chromecasts:
+    print(name.strip())
+    print(ascii(chromecasts))
+    if name.strip() in chromecasts:
         cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
-        return "Chromecast is now set to: " + name
+        mc = cast.media_controller
+        return "Chromecast is now set to: " + cast
     else:
         return "Chromecast " + name + " is not available"
 
@@ -43,12 +50,40 @@ def play_tts(text, lang='en', slow=False):
     logging.info(mp3_url)
     play_mp3(mp3_url)
 
+@app.route('/force/<choice>')
+def force_play(choice):
+    global force_cast
+    if choice == "true":
+        force_cast = True
+        return "Force changed to " + str(force_cast)
+    elif choice == "false":
+        force_cast = False
+        return "Force changed to " + str(force_cast)
+    else:
+        return "Invalid Input. Force is currently " + str(force_cast)
+
+@app.route('/vol/<level>')
+def set_vol(level):
+    global vol_level
+    level = int(level)
+    if level <= 1 and level >= 0:
+        vol_level = level
+        return "vox volume set to " + str(vol_level)
+    else:
+        return "invalid input, please give a value between 0 and 1"
 
 def play_mp3(mp3_url):
-    print(mp3_url)
-    cast.wait()
-    mc = cast.media_controller
-    mc.play_media(mp3_url, 'audio/mp3')
+    print(cast.status.is_active_input)
+    if str(cast.status.is_active_input) == "None":
+        cast.wait()
+        old_vol = cast.status.volume_level
+        cast.set_volume(vol_level)
+        mc.play_media(mp3_url, 'audio/mp3')
+        cast.wait()
+        #cast.set_volume(old_vol)
+        return True
+    else:
+        return False
 
 
 @app.route('/static/<path:path>')
@@ -66,10 +101,8 @@ def play(filename):
         return "False"
 
 
-@app.route('/say/')
-def say():
-    text = request.args.get("text")
-    lang = request.args.get("lang")
+@app.route('/say/<text>')
+def say(text):
     if not text:
         return False
     if not lang:
@@ -78,27 +111,25 @@ def say():
     return text
 
 
-@app.route('/sayvox/')
-def sayvox():
-    text = request.args.get("text")
+@app.route('/sayvox/<text>')
+def sayvox(text):
     if not text:
         return False
     else:
-        filename = play_vox(text)
-        if filename == "not found":
+        filename = get_vox_mp3(text)
+        if filename is None:
             return "Vox can't say any of those words"
         else:
-            return "vox says: " + filename
+            urlparts = urlparse(request.url)
+            mp3_url = "http://" + urlparts.netloc + "/" + filename
+            played = play_mp3(mp3_url)
+            if played:
+                return "vox says: " + filename
+            else:
+                return "cast is in use"
 
-def play_vox(text):
-    filename = vox.savetomp3(text)
-    urlparts = urlparse(request.url)
-    mp3_url = "http://" + urlparts.netloc + "/" + filename
-    if filename == "not found":
-        return "not found"
-    else:
-        play_mp3(mp3_url)
-        return(filename)
+def get_vox_mp3(text):
+    return vox.savetomp3(text)
 
 
 if __name__ == '__main__':
