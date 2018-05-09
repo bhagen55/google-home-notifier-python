@@ -25,7 +25,6 @@ ing = "ing"
 # Takes sentence and seperates into individual words
 def convertsentence(sentence):
     words = sentence.split()
-    print("words: " + str(words))
     output = []
 
     for word in words:
@@ -40,7 +39,6 @@ def convertsentence(sentence):
             output.append(period)
         else:
             output.append(word)
-    print("output: " + str(output))
     return output
 
 
@@ -67,7 +65,6 @@ def savetomp3(sentence):
         words = convertsentence(sentence)
         playlist = AudioSegment.silent(duration=500)
         for word in words:
-            print(word)
             if not os.path.isfile(soundpath + word + filetype):
                 print(word + " does not exist, skipping")
                 sentence = sentence.replace(word, '')

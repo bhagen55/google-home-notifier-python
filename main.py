@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-chromecast_name = "Techhouse" #edit me to be your google home group
+chromecast_name = "GoogleHome" #edit me to be your google home group
 path = "/static/cache/"
 
 app = Flask(__name__)
@@ -26,8 +26,6 @@ vol_level = 1
 
 @app.route('/chromecast/<name>')
 def switch_chromecast(name):
-    print(name.strip())
-    print(ascii(chromecasts))
     if name.strip() in chromecasts:
         cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
         mc = cast.media_controller
@@ -73,14 +71,14 @@ def set_vol(level):
         return "invalid input, please give a value between 0 and 1"
 
 def play_mp3(mp3_url):
-    print(cast.status.is_active_input)
-    if str(cast.status.is_active_input) == "None":
+    print("cast status: " + str(cast.status.is_active_input))
+    if str(cast.status.is_active_input) == "False":
         cast.wait()
         old_vol = cast.status.volume_level
         cast.set_volume(vol_level)
         mc.play_media(mp3_url, 'audio/mp3')
         cast.wait()
-        #cast.set_volume(old_vol)
+        cast.set_volume(old_vol)
         return True
     else:
         return False
