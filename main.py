@@ -4,6 +4,7 @@ from flask import Flask, request
 import socket
 import pychromecast
 import logging
+import time
 from gtts import gTTS
 from slugify import slugify
 from pathlib import Path
@@ -12,12 +13,12 @@ from urllib.parse import urlparse
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-chromecast_name = "GoogleHome" #edit me to be your google home group
+chromecast_name = "Techhouse" #edit me to be your google home group
 path = "/static/cache/"
 
 app = Flask(__name__)
 logging.info("Starting up chromecasts")
-chromecasts = pychromecast.get_chromecasts()
+chromecasts = pychromecast.get_chromecasts(blocking=False)
 cast = next(cc for cc in chromecasts if cc.device.friendly_name == chromecast_name)
 mc = cast.media_controller
 
@@ -26,12 +27,11 @@ vol_level = 1
 
 @app.route('/chromecast/<name>')
 def switch_chromecast(name):
-    if name.strip() in chromecasts:
-        cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
-        mc = cast.media_controller
-        return "Chromecast is now set to: " + cast
-    else:
-        return "Chromecast " + name + " is not available"
+    cast = next(cc for cc in chromecasts if cc.device.friendly_name == name)
+    mc = cast.media_controller
+    return "Chromecast is now set to: " + cast.device.friendly_name
+    #else:
+    #    return "Chromecast " + name + " is not available"
 
 def play_tts(text, lang='en', slow=False):
     tts = gTTS(text=text, lang=lang, slow=slow)
@@ -71,13 +71,18 @@ def set_vol(level):
         return "invalid input, please give a value between 0 and 1"
 
 def play_mp3(mp3_url):
-    print("cast status: " + str(cast.status.is_active_input))
-    if str(cast.status.is_active_input) == "False":
+    print("cast status: " + str(cast.status))
+    #if str(cast.status.status_text) == '' or str(cast.status.status_text) == 'Ready To Cast' or force_cast == True:
+    if cast.is_idle or force_cast == True:
         cast.wait()
         old_vol = cast.status.volume_level
         cast.set_volume(vol_level)
         mc.play_media(mp3_url, 'audio/mp3')
-        cast.wait()
+        mc.block_until_active()
+        print(cast.status.status_text)
+        time.sleep(10)
+        print(cast.status.status_text)
+        time
         cast.set_volume(old_vol)
         return True
     else:
