@@ -20,7 +20,7 @@ app = Flask(__name__)
 logging.info("Starting up chromecasts")
 chromecasts = pychromecast.get_chromecasts(blocking=False)
 cast = next(cc for cc in chromecasts if cc.device.friendly_name == chromecast_name)
-mc = cast.media_controller
+#mc = cast.media_controlle
 
 force_cast = False
 vol_level = 1
@@ -71,37 +71,33 @@ def set_vol(level):
         return "invalid input, please give a value between 0 and 1"
 
 def play_mp3(mp3_url):
-    print("cast status: " + str(cast.status))
-    #if str(cast.status.status_text) == '' or str(cast.status.status_text) == 'Ready To Cast' or force_cast == True:
-    if cast.is_idle or force_cast == True:
-        cast.wait()
-        old_vol = cast.status.volume_level
-        cast.set_volume(vol_level)
-        mc.play_media(mp3_url, 'audio/mp3')
-        mc.block_until_active()
-        print(cast.status.status_text)
-        time.sleep(10)
-        print(cast.status.status_text)
-        time
-        cast.set_volume(old_vol)
-        return True
-    else:
-        return False
+    cast.wait()
+    mc = cast.media_controller
+    mc.play_media(mp3_url, 'audio/mp3')
 
 
 @app.route('/static/<path:path>')
 def send_static(path):
         return send_from_directory('static', path)
 
+
 @app.route('/play/<filename>')
 def play(filename):
     urlparts = urlparse(request.url)
     mp3 = Path("./static/"+filename)
     if mp3.is_file():
-        play_mp3("http://"+urlparts.netloc+"/static/"+filename)
-        return filename
+        if cast.is_idle or force_cast == True:
+            old_vol = cast.status.volume_level
+            cast.set_volume(vol_level)
+            print("setting volume to " + vol_level)
+            result = play_mp3("http://"+urlparts.netloc+"/static/"+filename)
+            cast.set_volume(old_vol)
+            print("Returning volume to " + old_vol)
+            return result
+        else:
+            return "Busy"
     else:
-        return "False"
+        return "File Not Found"
 
 
 @app.route('/say/<text>')
@@ -123,10 +119,8 @@ def sayvox(text):
         if filename is None:
             return "Vox can't say any of those words"
         else:
-            urlparts = urlparse(request.url)
-            mp3_url = "http://" + urlparts.netloc + "/" + filename
-            played = play_mp3(mp3_url)
-            if played:
+            played = play(filename)
+            if played != "False":
                 return "vox says: " + filename
             else:
                 return "cast is in use"
