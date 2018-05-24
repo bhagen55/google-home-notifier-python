@@ -72,7 +72,7 @@ def savetomp3(sentence):
                 word_mp3 = AudioSegment.from_mp3(soundpath + word + filetype)
                 playlist = playlist.append(word_mp3)
                 playlist = playlist.append(AudioSegment.silent(duration=300))
-        if not playlist:
+        if not sentence:
             print("Cannot say any of the sentence")
             return None
         else:

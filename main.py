@@ -18,7 +18,7 @@ path = "/static/cache/"
 
 app = Flask(__name__)
 logging.info("Starting up chromecasts")
-chromecasts = pychromecast.get_chromecasts(blocking=False)
+chromecasts = pychromecast.get_chromecasts()
 cast = next(cc for cc in chromecasts if cc.device.friendly_name == chromecast_name)
 #mc = cast.media_controlle
 
@@ -84,18 +84,19 @@ def send_static(path):
 @app.route('/play/<filename>')
 def play(filename):
     urlparts = urlparse(request.url)
-    mp3 = Path("./static/"+filename)
+    mp3 = Path("./static/cache/"+filename)
+    print(mp3.is_file())
     if mp3.is_file():
         if cast.is_idle or force_cast == True:
             old_vol = cast.status.volume_level
             cast.set_volume(vol_level)
             print("setting volume to " + vol_level)
-            result = play_mp3("http://"+urlparts.netloc+"/static/"+filename)
+            play_mp3(mp3)
             cast.set_volume(old_vol)
             print("Returning volume to " + old_vol)
-            return result
+            return filename
         else:
-            return "Busy"
+            return "Device Is Busy"
     else:
         return "File Not Found"
 
@@ -116,14 +117,11 @@ def sayvox(text):
         return False
     else:
         filename = get_vox_mp3(text)
+        print(filename)
         if filename is None:
             return "Vox can't say any of those words"
         else:
-            played = play(filename)
-            if played != "False":
-                return "vox says: " + filename
-            else:
-                return "cast is in use"
+            return "Vox says: " + play(filename)
 
 def get_vox_mp3(text):
     return vox.savetomp3(text)
